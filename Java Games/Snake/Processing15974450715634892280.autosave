@@ -1,0 +1,139 @@
+Board board;
+PImage [] fruits;
+PImage [] headDirections;
+PImage lostScreen;
+
+int frame = 0;
+
+//runs once at the start of the program
+void setup() {
+    size (720, 630);
+    strokeWeight(0);
+    board = new Board(21, 24);
+
+    fruits = new PImage[]{
+        loadImage("Apple.png"), 
+        loadImage("Banana.png"), 
+        loadImage("Grapes.png"),
+        loadImage("Watermelon.png")
+    };
+    headDirections = new PImage[]{
+        loadImage("Up.png"),
+        loadImage("Right.png"),
+        loadImage("Down.png"),
+        loadImage("Left.png")
+    };
+
+    lostScreen = loadImage("LosingScreen.png");
+
+    drawBackground();
+}
+
+//runs 60 times per second
+void draw() {
+    if (board.isGameOver()){
+        gameOverAnimation();
+        return;
+    }
+         
+        frame++;
+        if (frame % 8 == 0) {
+            drawBackground();
+            board.moveSnake();
+        }
+
+    
+        String boardState = board.toString();
+        int curRow = 1;
+        int curCol = 1;
+
+        //parses the minesweepers toString
+        for (int i = 0; i < boardState.length(); i++) {
+            char curChar = boardState.charAt(i);
+            int x = (curCol - 1) * 30;
+            int y = (curRow - 1) * 30;
+            if (curChar != '\n'){
+            
+                if (curChar == '#')
+                    displaySnake(x, y);
+                if(curChar == 'H')
+                    displayHead (x, y, board.getSnakeDirection());
+                if (curChar == 'A')
+                    displayApple(x, y);
+        
+                curCol++;
+            } else {
+                //we have a \n so go to next line 
+                curRow++;
+                curCol = 1;
+            }
+        }
+}
+
+void drawBackground() {
+    for (int r = 0; r < board.getRows(); r++) 
+        for (int c = 0; c < board.getCols(); c++) {
+
+            if(r % 2 == c % 2)
+                fill(#aad751);
+            else fill(#a2d149);
+            int x = c;
+            int y = r;
+            rect(x * 30, y * 30, 30, 30);
+        }
+}
+
+//draws an apple on the screen at the specified (x,y) position
+void displayApple (int x, int y) {
+    image(fruits[0], x , y );
+}
+//draws the head of the snake facing the snake direction (0 is up, 1 is right, 2 is down, 3 is left)
+void displayHead (int x, int y, int snakeDirection) {
+    displaySnake(x , y );
+    image(headDirections[snakeDirection], x, y);
+}
+//draws a body square for the snake at the (x,y) position
+void displaySnake (int x, int y) {
+    fill(#507cf4);
+    rect(x ,y ,30,30);
+}
+
+void keyPressed() {
+    board.startClock();
+
+    if(board.isGameOver()) 
+        return;
+
+    if (keyCode == UP || key == 'W') 
+        board.setDirection(0);
+    
+    if (keyCode == RIGHT || key == 'D') 
+        board.setDirection(1);
+    
+    if (keyCode == DOWN || key == 'S') 
+        board.setDirection(2);
+
+    if (keyCode == LEFT || key == 'A')
+        board.setDirection(3);
+    
+}
+
+boolean once = true;
+void gameOverAnimation() {
+    fill(0, 25);
+    if(once){
+        rect(0,0,720,630);
+        once = false;
+    }
+    image(lostScreen, width/2 - 277/2,height / 2 -200);
+    
+}
+/*void mouseClicked () {
+
+    if (board.isGameOver())
+        if (mouseX > 360 - 207 && mouseX < 360 + 207 
+         && mouseY  200 - 207 && mouseY < 200 +207)
+           return;
+}
+*/
+//600-75 = 525 
